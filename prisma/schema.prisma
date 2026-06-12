@@ -1,0 +1,279 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String       @id @default(cuid())
+  name            String
+  email           String       @unique
+  passwordHash    String
+  avatar          String?
+  defaultCurrency String       @default("IDR")
+  timezone        String       @default("Asia/Jakarta")
+  createdAt       DateTime     @default(now())
+  memberships     Membership[]
+  transactions    Transaction[]
+  auditLogs       AuditLog[]
+}
+
+enum WorkspaceType {
+  PERSONAL
+  BUSINESS
+  INVESTMENT
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+model Workspace {
+  id             String          @id @default(cuid())
+  name           String
+  type           WorkspaceType
+  baseCurrency   String          @default("IDR")
+  createdAt      DateTime        @default(now())
+  memberships    Membership[]
+  wallets        Wallet[]
+  categories     Category[]
+  transactions   Transaction[]
+  products       Product[]
+  sales          Sale[]
+  operatingCosts OperatingCost[]
+  portfolios     Portfolio[]
+  budgets        Budget[]
+  invitations    Invitation[]
+  auditLogs      AuditLog[]
+}
+
+model Membership {
+  id          String    @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        Role
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+}
+
+enum WalletType {
+  CASH
+  BANK
+  EWALLET
+}
+
+model Wallet {
+  id           String        @id @default(cuid())
+  workspaceId  String
+  name         String
+  type         WalletType    @default(CASH)
+  createdAt    DateTime      @default(now())
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([workspaceId])
+}
+
+enum CategoryKind {
+  INCOME
+  EXPENSE
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  workspaceId  String
+  name         String
+  kind         CategoryKind
+  color        String        @default("#10b981")
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  budgets      Budget[]
+
+  @@index([workspaceId])
+}
+
+enum TxType {
+  INCOME
+  EXPENSE
+}
+
+enum TxMethod {
+  CASH
+  TRANSFER
+  EWALLET
+}
+
+enum RecurringRule {
+  NONE
+  WEEKLY
+  MONTHLY
+}
+
+model Transaction {
+  id          String        @id @default(cuid())
+  workspaceId String
+  walletId    String
+  categoryId  String?
+  type        TxType
+  amount      Float
+  date        DateTime
+  note        String?
+  method      TxMethod      @default(CASH)
+  recurring   RecurringRule @default(NONE)
+  nextRun     DateTime?
+  createdById String?
+  createdAt   DateTime      @default(now())
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  wallet      Wallet        @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  category    Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdBy   User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, date])
+  @@index([walletId])
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  sellPrice   Float
+  cogs        Float
+  stock       Int?
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  sales       Sale[]
+
+  @@index([workspaceId])
+}
+
+model Sale {
+  id          String    @id @default(cuid())
+  workspaceId String
+  productId   String
+  qty         Int
+  unitPrice   Float
+  date        DateTime
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, date])
+}
+
+model OperatingCost {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  amount      Float
+  date        DateTime
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, date])
+}
+
+model Portfolio {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  holdings    Holding[]
+
+  @@index([workspaceId])
+}
+
+enum AssetType {
+  STOCK
+  CRYPTO
+}
+
+model Holding {
+  id          String    @id @default(cuid())
+  portfolioId String
+  symbol      String
+  name        String?
+  assetType   AssetType
+  quantity    Float
+  costBasis   Float
+  buyDate     DateTime
+  soldAt      DateTime?
+  sellPrice   Float?
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
+}
+
+model PriceCache {
+  symbol    String    @id
+  assetType AssetType
+  price     Float
+  change24h Float     @default(0)
+  currency  String    @default("USD")
+  updatedAt DateTime  @updatedAt
+}
+
+model RateCache {
+  base      String   @id
+  rates     Json
+  updatedAt DateTime @updatedAt
+}
+
+model NewsCache {
+  id          String   @id @default(cuid())
+  title       String   @db.VarChar(500)
+  source      String
+  url         String   @unique @db.VarChar(500)
+  summary     String   @db.Text
+  imageUrl    String?  @db.VarChar(500)
+  category    String   @default("Bisnis")
+  publishedAt DateTime
+  fetchedAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String?
+  userName    String
+  action      String
+  entity      String
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+}
+
+model Invitation {
+  id          String    @id @default(cuid())
+  workspaceId String
+  email       String
+  role        Role      @default(MEMBER)
+  token       String    @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model Budget {
+  id          String    @id @default(cuid())
+  workspaceId String
+  categoryId  String
+  amount      Float
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, categoryId])
+}
