@@ -87,8 +87,8 @@ export default async function TransactionsPage({
                 </Button>
               }
             >
-              {(close) => (
-                <ActionForm action={importTransactionsCsv} close={close}>
+              {
+                <ActionForm action={importTransactionsCsv}>
                   <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
                     Format kolom: <code>tanggal,tipe,jumlah,kategori,dompet,catatan</code>
                     <br />
@@ -99,7 +99,7 @@ export default async function TransactionsPage({
                   </Field>
                   <SubmitButton className="w-full">Impor</SubmitButton>
                 </ActionForm>
-              )}
+              }
             </Modal>
           )}
           {canWrite && (

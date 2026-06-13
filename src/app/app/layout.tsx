@@ -9,7 +9,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <AppShell
-      user={{ name: ctx.user.name, email: ctx.user.email }}
+      user={{ name: ctx.user.name, email: ctx.user.email, avatar: ctx.user.avatar }}
       workspace={{ id: ctx.workspace.id, name: ctx.workspace.name, type: ctx.workspace.type }}
       workspaces={ctx.memberships.map((m) => ({
         id: m.workspace.id,

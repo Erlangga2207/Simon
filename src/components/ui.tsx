@@ -1,9 +1,19 @@
 "use client";
 
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { createContext, forwardRef, useContext, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Loader2, X } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
+
+/**
+ * Konteks untuk menutup Modal dari dalam isinya (mis. ActionForm menutup modal saat sukses).
+ * Dipakai agar halaman Server Component bisa mengoper children JSX biasa — bukan fungsi —
+ * ke Modal (Client Component). Fungsi tidak bisa dilempar lintas batas server→klien.
+ */
+const ModalCloseContext = createContext<(() => void) | null>(null);
+export function useModalClose() {
+  return useContext(ModalCloseContext);
+}
 
 /* ---------- Button ---------- */
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -232,7 +242,9 @@ export function Modal({
                 <X className="h-4 w-4" />
               </button>
             </div>
-            {typeof children === "function" ? children(() => setOpen(false)) : children}
+            <ModalCloseContext.Provider value={() => setOpen(false)}>
+              {typeof children === "function" ? children(() => setOpen(false)) : children}
+            </ModalCloseContext.Provider>
           </div>
         </div>
       )}
@@ -255,7 +267,9 @@ export function ConfirmForm({
   return (
     <form
       className={className}
-      action={action}
+      action={async (fd) => {
+        await action(fd);
+      }}
       onSubmit={(e) => {
         if (!confirm(message)) e.preventDefault();
       }}
@@ -278,6 +292,8 @@ export function ActionForm({
   className?: string;
 }) {
   const [error, setError] = useState<string | null>(null);
+  const modalClose = useModalClose();
+  const doClose = close ?? modalClose ?? undefined;
   return (
     <form
       className={cn("space-y-3", className)}
@@ -285,7 +301,7 @@ export function ActionForm({
         setError(null);
         const res = await action(fd);
         if (res?.error) setError(res.error);
-        else close?.();
+        else doClose?.();
       }}
     >
       {error && (

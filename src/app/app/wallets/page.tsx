@@ -59,11 +59,11 @@ export default async function WalletsPage() {
         </div>
         {isAdmin && (
           <Modal title="Dompet Baru" trigger={<Button><Plus className="h-4 w-4" /> Dompet</Button>}>
-            {(close) => (
-              <ActionForm action={createWallet} close={close}>
+            {
+              <ActionForm action={createWallet}>
                 <WalletForm />
               </ActionForm>
-            )}
+            }
           </Modal>
         )}
       </div>
@@ -88,11 +88,11 @@ export default async function WalletsPage() {
                         </button>
                       }
                     >
-                      {(close) => (
-                        <ActionForm action={updateWallet} close={close}>
+                      {
+                        <ActionForm action={updateWallet}>
                           <WalletForm defaults={{ id: w.id, name: w.name, type: w.type }} />
                         </ActionForm>
-                      )}
+                      }
                     </Modal>
                     <ConfirmForm
                       action={deleteWallet}

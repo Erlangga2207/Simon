@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { logAudit, requireUser, requireWorkspace, setActiveWorkspaceCookie } from "@/lib/auth";
+import { sendInvitationEmail } from "@/lib/email";
 
 const inviteSchema = z.object({
   email: z.string().email("Email tidak valid"),
@@ -36,6 +37,13 @@ export async function createInvitation(formData: FormData) {
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     },
   });
+  // Kirim email undangan — kegagalan email tidak boleh menggagalkan pembuatan undangan
+  // (tautan tetap bisa disalin manual dari halaman Tim).
+  try {
+    await sendInvitationEmail(parsed.data.email, token, workspace.name, user.name, parsed.data.role);
+  } catch (e) {
+    console.error("[team] Gagal mengirim email undangan:", e);
+  }
   await logAudit(workspace.id, user.id, user.name, "mengundang", parsed.data.email);
   revalidatePath("/app/team");
 }

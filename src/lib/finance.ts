@@ -224,7 +224,33 @@ export async function getInvestmentStats(workspaceId: string) {
     null
   );
 
-  return { portfolios, holdings, sold, totalValue, totalCost, unrealizedPL, realizedPL, returnPct, lastUpdate };
+  // Tren nilai portofolio 6 bulan terakhir (USD). Tier gratis tidak menyediakan harga
+  // historis, jadi tiap bulan dinilai dengan harga TERKINI untuk aset yang masih dipegang
+  // pada akhir bulan itu (aset aktif → harga pasar kini; aset terjual → harga jualnya).
+  // Tujuannya memperlihatkan pertumbuhan nilai saat aset ditambah/dijual, bukan valuasi
+  // historis presisi. Titik bulan terakhir = nilai portofolio saat ini.
+  const trendMonths = 6;
+  const tNow = new Date();
+  const valueTrend: { label: string; nilai: number }[] = [];
+  for (let i = 0; i < trendMonths; i++) {
+    const d = new Date(tNow.getFullYear(), tNow.getMonth() - (trendMonths - 1 - i), 1);
+    const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+    let nilai = 0;
+    for (const h of active) {
+      if (h.buyDate <= monthEnd) {
+        const price = prices.get(h.symbol.toUpperCase())?.price ?? h.costBasis;
+        nilai += price * h.quantity;
+      }
+    }
+    for (const h of sold) {
+      if (h.buyDate <= monthEnd && h.soldAt && h.soldAt > monthEnd) {
+        nilai += (h.sellPrice ?? h.costBasis) * h.quantity;
+      }
+    }
+    valueTrend.push({ label: monthLabel(d), nilai });
+  }
+
+  return { portfolios, holdings, sold, totalValue, totalCost, unrealizedPL, realizedPL, returnPct, lastUpdate, valueTrend };
 }
 
 /** Konversi nilai USD investasi ke mata uang dasar workspace (untuk kartu dashboard). */
