@@ -9,13 +9,15 @@ export function NewsCard({
   news: {
     title: string;
     source: string;
-    url: string;
+    url: string | null;
     summary: string;
     imageUrl: string | null;
     category: string;
     publishedAt: Date;
   };
 }) {
+  const url = news.url?.trim();
+  const hasUrl = Boolean(url);
   return (
     <Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-md">
       <div className="relative h-40 w-full bg-muted">
@@ -32,24 +34,34 @@ export function NewsCard({
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <a href={news.url} target="_blank" rel="noopener noreferrer" className="group">
-          <h3 className="line-clamp-2 text-sm font-semibold leading-snug group-hover:text-primary">
-            {news.title}
-          </h3>
-        </a>
+        {hasUrl ? (
+          <a href={url} target="_blank" rel="noopener noreferrer" className="group">
+            <h3 className="line-clamp-2 text-sm font-semibold leading-snug group-hover:text-primary">
+              {news.title}
+            </h3>
+          </a>
+        ) : (
+          <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{news.title}</h3>
+        )}
         <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">{news.summary}</p>
         <div className="mt-auto flex items-center justify-between pt-2 text-[11px] text-muted-foreground">
           <span className="font-medium">{news.source}</span>
           <span>{timeAgo(news.publishedAt)}</span>
         </div>
-        <a
-          href={news.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-        >
-          Baca di sumber asli <ExternalLink className="h-3 w-3" />
-        </a>
+        {hasUrl ? (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+          >
+            Baca di sumber asli <ExternalLink className="h-3 w-3" />
+          </a>
+        ) : (
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
+            Sumber tidak tersedia
+          </span>
+        )}
       </div>
     </Card>
   );

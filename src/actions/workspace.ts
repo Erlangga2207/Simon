@@ -86,6 +86,7 @@ export async function createWorkspace(formData: FormData) {
   );
   await setActiveWorkspaceCookie(ws.id);
   await logAudit(ws.id, user.id, user.name, "membuat", `workspace "${ws.name}"`);
+  revalidatePath("/app", "layout");
   redirect("/app/dashboard");
 }
 

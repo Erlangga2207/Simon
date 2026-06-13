@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, forwardRef, useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useFormStatus } from "react-dom";
 import { Loader2, X } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -218,36 +219,42 @@ export function Modal({
   return (
     <>
       <span onClick={() => setOpen(true)}>{trigger}</span>
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
-          onClick={(e) => e.target === e.currentTarget && setOpen(false)}
-        >
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+          // Di-portal ke <body> agar overlay `position: fixed` lepas dari containing block
+          // ancestor yang punya backdrop-filter/transform (mis. header sticky dengan backdrop-blur).
+          // Tanpa ini, modal yang dibuka dari dalam header ter-clip & tertimpa elemen lain.
           <div
-            ref={ref}
-            role="dialog"
-            aria-modal="true"
-            className={cn(
-              "max-h-[92vh] w-full overflow-y-auto rounded-t-2xl border border-border bg-card p-5 shadow-xl sm:rounded-2xl",
-              wide ? "sm:max-w-2xl" : "sm:max-w-md"
-            )}
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
+            onClick={(e) => e.target === e.currentTarget && setOpen(false)}
           >
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-base font-semibold">{title}</h2>
-              <button
-                onClick={() => setOpen(false)}
-                aria-label="Tutup"
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"
-              >
-                <X className="h-4 w-4" />
-              </button>
+            <div
+              ref={ref}
+              role="dialog"
+              aria-modal="true"
+              className={cn(
+                "max-h-[92vh] w-full overflow-y-auto rounded-t-2xl border border-border bg-card p-5 shadow-xl sm:rounded-2xl",
+                wide ? "sm:max-w-2xl" : "sm:max-w-md"
+              )}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-base font-semibold">{title}</h2>
+                <button
+                  onClick={() => setOpen(false)}
+                  aria-label="Tutup"
+                  className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <ModalCloseContext.Provider value={() => setOpen(false)}>
+                {typeof children === "function" ? children(() => setOpen(false)) : children}
+              </ModalCloseContext.Provider>
             </div>
-            <ModalCloseContext.Provider value={() => setOpen(false)}>
-              {typeof children === "function" ? children(() => setOpen(false)) : children}
-            </ModalCloseContext.Provider>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </>
   );
 }

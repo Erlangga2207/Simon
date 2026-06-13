@@ -155,43 +155,8 @@ async function main() {
     ],
   });
 
-  /* ---------- Berita contoh (agar halaman berita tidak kosong tanpa API) ---------- */
-  await db.newsCache.createMany({
-    data: [
-      {
-        title: "Pasar saham Asia menguat di tengah ekspektasi pemangkasan suku bunga",
-        source: "Contoh Finansial",
-        url: "https://example.com/berita/pasar-asia-menguat",
-        summary: "Indeks utama kawasan Asia ditutup menguat setelah pelaku pasar memperkirakan bank sentral akan melonggarkan kebijakan moneter pada kuartal mendatang.",
-        category: "Pasar",
-        publishedAt: dateAt(0, Math.max(1, new Date().getDate() - 1)),
-      },
-      {
-        title: "Bitcoin bertahan di atas level psikologis, investor pantau arus dana ETF",
-        source: "Contoh Kripto",
-        url: "https://example.com/berita/bitcoin-bertahan",
-        summary: "Harga Bitcoin relatif stabil dalam sepekan terakhir. Analis menyoroti arus masuk ETF spot sebagai penopang utama permintaan.",
-        category: "Kripto",
-        publishedAt: dateAt(0, Math.max(1, new Date().getDate() - 1)),
-      },
-      {
-        title: "UMKM didorong digitalisasi pencatatan keuangan untuk akses pembiayaan",
-        source: "Contoh Ekonomi",
-        url: "https://example.com/berita/umkm-digitalisasi",
-        summary: "Pencatatan keuangan yang rapi dinilai memperbesar peluang UMKM memperoleh pembiayaan formal dengan bunga lebih rendah.",
-        category: "Ekonomi",
-        publishedAt: dateAt(0, Math.max(1, new Date().getDate() - 2)),
-      },
-      {
-        title: "Perusahaan teknologi besar umumkan rencana investasi pusat data baru",
-        source: "Contoh Teknologi",
-        url: "https://example.com/berita/investasi-pusat-data",
-        summary: "Investasi pusat data baru diumumkan untuk mendukung permintaan layanan komputasi awan dan kecerdasan buatan yang terus tumbuh.",
-        category: "Teknologi",
-        publishedAt: dateAt(0, Math.max(1, new Date().getDate() - 2)),
-      },
-    ],
-  });
+  // Catatan: berita TIDAK lagi di-seed dengan data contoh (example.com).
+  // Feed berita diisi otomatis oleh getNews() dari Marketaux saat halaman dibuka.
 
   console.log("Seed selesai ✔");
   console.log(`  Login demo : ${DEMO_EMAIL}`);

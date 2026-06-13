@@ -69,8 +69,16 @@ export async function getNews(category?: string, limit = 24) {
     }
   }
 
+  // Jangan tampilkan baris placeholder seed (URL example.com) maupun yang URL-nya kosong —
+  // landing & /app/news harus selalu menyajikan berita asli dari sumbernya.
+  const baseWhere = {
+    url: { not: "" },
+    NOT: { url: { contains: "example.com" } },
+  };
+
   return db.newsCache.findMany({
-    where: category && category !== "Semua" ? { category } : undefined,
+    where:
+      category && category !== "Semua" ? { ...baseWhere, category } : baseWhere,
     orderBy: { publishedAt: "desc" },
     take: limit,
   });

@@ -13,6 +13,7 @@ import {
   ChevronsUpDown,
   FileText,
   LayoutDashboard,
+  LayoutGrid,
   LineChart,
   LogOut,
   Moon,
@@ -23,6 +24,7 @@ import {
   User,
   Users,
   Wallet,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ActionForm, Button, Field, Input, Modal, Select, SubmitButton } from "./ui";
@@ -55,6 +57,10 @@ function useClickOutside(onClose: () => void) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handler = (e: MouseEvent) => {
+      const target = e.target as Element | null;
+      // Abaikan klik di dalam modal yang di-portal ke <body> (bukan turunan DOM dropdown ini),
+      // agar membuka/mengisi modal tidak menutup dropdown & meng-unmount modal-nya.
+      if (target?.closest("[role='dialog']")) return;
       if (ref.current && !ref.current.contains(e.target as Node)) onClose();
     };
     document.addEventListener("mousedown", handler);
@@ -214,9 +220,30 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const items = navItems(workspace.type);
-  const mobileItems = items.filter((i) =>
-    ["/app/dashboard", "/app/transactions", "/app/business", "/app/investment", "/app/reports", "/app/settings"].includes(i.href)
-  ).slice(0, 5);
+
+  // Bottom nav mobile: 4 menu utama + tombol "Lainnya".
+  // Sisanya (Berita, Tim, Pengaturan, dan Bisnis/Investasi) masuk ke drawer.
+  const PRIMARY_MOBILE = ["/app/dashboard", "/app/transactions", "/app/wallets", "/app/reports"];
+  const primaryItems = PRIMARY_MOBILE.map((href) => items.find((i) => i.href === href)).filter(
+    (i): i is (typeof items)[number] => Boolean(i)
+  );
+  const moreItems = items.filter((i) => !PRIMARY_MOBILE.includes(i.href));
+  const moreActive = moreItems.some((i) => pathname.startsWith(i.href));
+
+  const [moreOpen, setMoreOpen] = useState(false);
+  // Tutup drawer saat pindah halaman.
+  useEffect(() => setMoreOpen(false), [pathname]);
+  // Kunci scroll & dukung Escape selama drawer terbuka.
+  useEffect(() => {
+    if (!moreOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMoreOpen(false);
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [moreOpen]);
 
   return (
     <div className="min-h-dvh">
@@ -263,7 +290,7 @@ export function AppShell({
 
       {/* Bottom nav mobile */}
       <nav className="no-print fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-card lg:hidden">
-        {mobileItems.map(({ href, label, icon: Icon }) => (
+        {primaryItems.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
             href={href}
@@ -276,7 +303,64 @@ export function AppShell({
             {label}
           </Link>
         ))}
+        <button
+          type="button"
+          onClick={() => setMoreOpen(true)}
+          aria-label="Menu lainnya"
+          aria-expanded={moreOpen}
+          className={cn(
+            "flex flex-1 flex-col items-center gap-1 py-2 text-[10px] font-medium",
+            moreActive || moreOpen ? "text-primary" : "text-muted-foreground"
+          )}
+        >
+          <LayoutGrid className="h-5 w-5" />
+          Lainnya
+        </button>
       </nav>
+
+      {/* Drawer "Lainnya" — menu yang tidak muat di bottom nav */}
+      {moreOpen && (
+        <div
+          className="no-print fixed inset-0 z-40 flex items-end bg-black/50 lg:hidden"
+          onClick={(e) => e.target === e.currentTarget && setMoreOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu lainnya"
+            className="max-h-[80vh] w-full overflow-y-auto rounded-t-2xl border-t border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-xl"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-base font-semibold">Menu Lainnya</h2>
+              <button
+                onClick={() => setMoreOpen(false)}
+                aria-label="Tutup"
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              {moreItems.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setMoreOpen(false)}
+                  className={cn(
+                    "flex flex-col items-center gap-2 rounded-xl border p-3 text-center text-xs font-medium transition-colors",
+                    pathname.startsWith(href)
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
