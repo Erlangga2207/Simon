@@ -15,10 +15,31 @@ model User {
   avatar          String?
   defaultCurrency String       @default("IDR")
   timezone        String       @default("Asia/Jakarta")
+  emailVerifiedAt DateTime?
   createdAt       DateTime     @default(now())
   memberships     Membership[]
   transactions    Transaction[]
   auditLogs       AuditLog[]
+  authTokens      AuthToken[]
+}
+
+enum AuthTokenType {
+  RESET
+  VERIFY
+}
+
+/// Token sekali pakai untuk reset password & verifikasi email.
+model AuthToken {
+  id        String        @id @default(cuid())
+  userId    String
+  type      AuthTokenType
+  token     String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
 }
 
 enum WorkspaceType {

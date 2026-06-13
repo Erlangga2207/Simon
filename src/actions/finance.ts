@@ -62,6 +62,22 @@ export async function createCategory(formData: FormData) {
   revalidatePath("/app", "layout");
 }
 
+export async function updateCategory(formData: FormData) {
+  const { user, workspace } = await requireWorkspace("ADMIN");
+  const id = String(formData.get("id"));
+  const parsed = categorySchema.safeParse({
+    name: formData.get("name"),
+    kind: formData.get("kind"),
+    color: formData.get("color") || "#10b981",
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const existing = await db.category.findFirst({ where: { id, workspaceId: workspace.id } });
+  if (!existing) return { error: "Kategori tidak ditemukan." };
+  await db.category.update({ where: { id }, data: parsed.data });
+  await logAudit(workspace.id, user.id, user.name, "mengubah", `kategori "${parsed.data.name}"`);
+  revalidatePath("/app", "layout");
+}
+
 export async function deleteCategory(formData: FormData) {
   const { user, workspace } = await requireWorkspace("ADMIN");
   const id = String(formData.get("id"));

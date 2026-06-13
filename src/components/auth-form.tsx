@@ -9,11 +9,13 @@ export function AuthCard({
   title,
   subtitle,
   footer,
+  notice,
 }: {
   mode: "login" | "register";
   title: string;
   subtitle: string;
   footer: React.ReactNode;
+  notice?: string;
 }) {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-4">
@@ -27,6 +29,11 @@ export function AuthCard({
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           <h1 className="text-lg font-semibold">{title}</h1>
           <p className="mb-5 mt-1 text-xs text-muted-foreground">{subtitle}</p>
+          {notice && (
+            <p className="mb-4 rounded-lg bg-positive/10 px-3 py-2 text-xs font-medium text-positive">
+              {notice}
+            </p>
+          )}
           <ActionForm action={mode === "login" ? login : register}>
             {mode === "register" && (
               <Field label="Nama lengkap">
@@ -49,6 +56,13 @@ export function AuthCard({
             <SubmitButton className="w-full">
               {mode === "login" ? "Masuk" : "Daftar & Mulai"}
             </SubmitButton>
+            {mode === "login" && (
+              <p className="text-right text-xs">
+                <Link href="/forgot-password" className="font-medium text-primary hover:underline">
+                  Lupa password?
+                </Link>
+              </p>
+            )}
           </ActionForm>
         </div>
         <p className="mt-4 text-center text-xs text-muted-foreground">{footer}</p>

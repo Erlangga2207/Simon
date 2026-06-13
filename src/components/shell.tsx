@@ -160,17 +160,22 @@ export function ThemeToggle() {
   );
 }
 
-function UserMenu({ name, email }: { name: string; email: string }) {
+function UserMenu({ name, email, avatar }: { name: string; email: string; avatar?: string | null }) {
   const [open, setOpen] = useState(false);
   const ref = useClickOutside(() => setOpen(false));
   return (
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground"
+        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-primary-foreground"
         aria-label="Menu profil"
       >
-        {name.charAt(0).toUpperCase()}
+        {avatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={avatar} alt="" className="h-9 w-9 rounded-full object-cover" />
+        ) : (
+          name.charAt(0).toUpperCase()
+        )}
       </button>
       {open && (
         <div className="absolute right-0 top-full z-40 mt-1 w-56 rounded-xl border border-border bg-card p-1.5 shadow-lg">
@@ -202,7 +207,7 @@ export function AppShell({
   workspaces,
   children,
 }: {
-  user: { name: string; email: string };
+  user: { name: string; email: string; avatar?: string | null };
   workspace: WsInfo;
   workspaces: WsInfo[];
   children: React.ReactNode;
@@ -249,12 +254,12 @@ export function AppShell({
         <WorkspaceSwitcher current={workspace} all={workspaces} />
         <div className="ml-auto flex items-center gap-1">
           <ThemeToggle />
-          <UserMenu name={user.name} email={user.email} />
+          <UserMenu name={user.name} email={user.email} avatar={user.avatar} />
         </div>
       </header>
 
       {/* Konten */}
-      <main className="px-4 pb-24 pt-5 sm:px-6 lg:pb-10 lg:pl-[17rem]">{children}</main>
+      <main className="px-4 pb-24 pt-5 sm:px-6 lg:pb-10 lg:pl-[17rem] print:p-0 print:lg:pl-0">{children}</main>
 
       {/* Bottom nav mobile */}
       <nav className="no-print fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-card lg:hidden">
