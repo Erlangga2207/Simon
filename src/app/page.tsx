@@ -17,7 +17,7 @@ export default async function LandingPage() {
       <header className="sticky top-0 z-20 border-b border-border bg-card/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground">S</span>
+            <img src="/images/simon-logo.jpg" alt="Simon" className="h-8 w-8 rounded-lg object-cover" />
             <span className="text-lg font-bold tracking-tight">Simon</span>
           </Link>
           <nav className="flex items-center gap-2">

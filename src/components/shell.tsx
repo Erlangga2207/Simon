@@ -250,7 +250,7 @@ export function AppShell({
       {/* Sidebar desktop */}
       <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border bg-card lg:flex">
         <Link href="/" className="flex items-center gap-2 px-5 py-5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground">S</span>
+          <img src="/images/simon-logo.jpg" alt="Simon" className="h-8 w-8 rounded-lg object-cover" />
           <span className="text-lg font-bold tracking-tight">Simon</span>
         </Link>
         <nav className="flex-1 space-y-0.5 px-3">
@@ -275,8 +275,8 @@ export function AppShell({
 
       {/* Header */}
       <header className="no-print sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-border bg-card/80 px-4 backdrop-blur lg:pl-64">
-        <Link href="/" className="mr-1 flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground lg:hidden">
-          S
+        <Link href="/" className="mr-1 lg:hidden">
+          <img src="/images/simon-logo.jpg" alt="Simon" className="h-8 w-8 rounded-lg object-cover" />
         </Link>
         <WorkspaceSwitcher current={workspace} all={workspaces} />
         <div className="ml-auto flex items-center gap-1">
