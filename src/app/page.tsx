@@ -1,23 +1,67 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ArrowRight, Briefcase, ChartPie, ShieldCheck, Wallet } from "lucide-react";
 import { PriceTicker } from "@/components/ticker";
 import { NewsCard } from "@/components/news-card";
 import { ThemeToggle } from "@/components/shell";
+import { JsonLd } from "@/components/json-ld";
 import { getCurrentUser } from "@/lib/auth";
 import { getNews } from "@/lib/news";
 import { formatDateTime } from "@/lib/utils";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://simon.example.com";
+
+export const metadata: Metadata = {
+  title: "Simon — Aplikasi Pencatat Keuangan Gratis untuk Pribadi, UMKM & Investasi",
+  description:
+    "Catat pemasukan & pengeluaran harian, hitung laba bersih UMKM otomatis, dan pantau portofolio saham & kripto real-time. Gratis, tanpa langganan — lengkap dengan berita pasar terkini.",
+  alternates: { canonical: "/" },
+};
 
 export default async function LandingPage() {
   const user = await getCurrentUser();
   const news = await getNews(undefined, 9).catch(() => []);
 
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: "Simon",
+      url: SITE_URL,
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      description:
+        "Aplikasi pengelola keuangan untuk mencatat keuangan pribadi, menghitung laba usaha UMKM, dan memantau portofolio investasi.",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "IDR",
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Simon",
+      url: SITE_URL,
+      publisher: {
+        "@type": "Organization",
+        name: "Simon",
+        logo: {
+          "@type": "ImageObject",
+          url: `${SITE_URL}/icons/icon-512.png`,
+        },
+      },
+    },
+  ];
+
   return (
     <div className="min-h-dvh">
+      <JsonLd data={jsonLd} />
       <header className="sticky top-0 z-20 border-b border-border bg-card/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/images/simon-logo.jpg" alt="Simon" className="h-8 w-8 rounded-lg object-cover" />
+            <img src="/images/simon-logo.jpg" alt="Logo Simon — aplikasi pengelola keuangan" className="h-8 w-8 rounded-lg object-cover" />
             <span className="text-lg font-bold tracking-tight">Simon</span>
           </Link>
           <nav className="flex items-center gap-2">

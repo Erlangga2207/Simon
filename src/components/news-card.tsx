@@ -23,7 +23,7 @@ export function NewsCard({
       <div className="relative h-40 w-full bg-muted">
         {news.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={news.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+          <img src={news.imageUrl} alt={news.title} className="h-full w-full object-cover" loading="lazy" />
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             <Newspaper className="h-10 w-10" />

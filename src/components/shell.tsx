@@ -196,7 +196,14 @@ function UserMenu({ name, email, avatar }: { name: string; email: string; avatar
           >
             <Settings className="h-4 w-4 text-muted-foreground" /> Pengaturan
           </Link>
-          <form action={logout}>
+          <form
+            action={logout}
+            onSubmit={() => {
+              // KEAMANAN: bersihkan cache dinamis service worker saat logout agar
+              // respons /app/* milik user ini tidak terbaca user lain di perangkat yang sama.
+              navigator.serviceWorker?.controller?.postMessage({ type: "CLEAR_DYNAMIC_CACHE" });
+            }}
+          >
             <button className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-negative hover:bg-muted">
               <LogOut className="h-4 w-4" /> Keluar
             </button>

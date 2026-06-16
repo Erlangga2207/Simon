@@ -3,7 +3,13 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { AuthCard } from "@/components/auth-form";
 
-export const metadata = { title: "Masuk" };
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Masuk",
+  description: "Masuk ke akun Simon untuk mengelola keuangan pribadi, laba usaha, dan portofolio investasi Anda.",
+  robots: { index: false, follow: true },
+};
 
 export default async function LoginPage({
   searchParams,

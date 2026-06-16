@@ -3,7 +3,14 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { AuthCard } from "@/components/auth-form";
 
-export const metadata = { title: "Daftar" };
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Daftar Gratis",
+  description: "Buat akun Simon gratis dan langsung dapat workspace pribadi untuk mencatat keuangan, menghitung laba UMKM, dan memantau investasi.",
+  robots: { index: true, follow: true },
+  alternates: { canonical: "/register" },
+};
 
 export default async function RegisterPage() {
   if (await getCurrentUser()) redirect("/app/dashboard");
