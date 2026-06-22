@@ -2,13 +2,13 @@
   "name": "simon",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "postinstall": "prisma generate",
-    "db:push": "prisma db push",
-    "db:seed": "node prisma/seed.mjs"
+"scripts": {
+  "dev": "next dev",
+  "build": "prisma generate && next build",
+  "start": "next start",
+  "postinstall": "prisma generate",
+  "db:push": "prisma db push",
+  "db:seed": "node prisma/seed.mjs"
 },
   "dependencies": {
     "@prisma/client": "^6.19.1",
