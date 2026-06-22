@@ -252,11 +252,11 @@ model RateCache {
 
 model NewsCache {
   id          String   @id @default(cuid())
-  title       String   @db.VarChar(500)
+  title       String
   source      String
-  url         String   @unique @db.VarChar(500)
-  summary     String   @db.Text
-  imageUrl    String?  @db.VarChar(500)
+  url         String   @unique
+  summary     String
+  imageUrl    String?
   category    String   @default("Bisnis")
   publishedAt DateTime
   fetchedAt   DateTime @default(now())
